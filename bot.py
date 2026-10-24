@@ -1,14 +1,9 @@
-"""OOTv2 Bot nâng cấp dựa trên bot mẫu MVP — Python 3.12+, chỉ standard library.
-
-Protocol: đọc đúng 1 JSON line từ stdin và in đúng 1 JSON line ra stdout.
-Bot stateless. Không in log ra stdout. 
-Cải tiến: Xếp quân linh hoạt và có ưu tiên bắt quân đối phương khi có cơ hội.
+"""OOTv2 Bot Chuẩn - Standard Library Only, Stateless MVP Protocol v1.
 """
 
 import json
 import sys
 import random
-
 
 def on_setup(request):
     pieces = request["my_pieces"]
@@ -16,7 +11,7 @@ def on_setup(request):
     if len(pieces) != 9 or len(squares) < 9:
         raise ValueError("Unexpected setup request")
     
-    # Cải tiến: Xáo trộn nhẹ các ô available_squares để thế trận xếp quân không bị trùng lặp
+    # Xếp ngẫu nhiên 9 quân vào 9 ô available_squares đầu tiên
     target_squares = list(squares[:9])
     random.shuffle(target_squares)
     
@@ -27,21 +22,13 @@ def on_setup(request):
         ]
     }
 
-
 def on_move(request):
     legal_moves = request["legal_moves"]
     if not legal_moves:
-        # Judge phải xử lý no_legal_move trước khi gọi bot.
         raise ValueError("No legal moves available")
     
-    # Cải tiến chiến thuật: Ưu tiên chọn nước đi ăn quân đối phương (nếu có)
-    captures = [m for m in legal_moves if m.get("is_capture") or m.get("captures")]
-    if captures:
-        return random.choice(captures)
-    
-    # Nếu không có nước ăn quân, chọn ngẫu nhiên một nước đi hợp lệ để tăng tính biến hóa
+    # Chọn ngẫu nhiên một nước đi hợp lệ
     return random.choice(legal_moves)
-
 
 def main():
     line = sys.stdin.readline()
@@ -61,7 +48,6 @@ def main():
 
     sys.stdout.write(json.dumps(response, ensure_ascii=False) + "\n")
     sys.stdout.flush()
-
 
 if __name__ == "__main__":
     try:
